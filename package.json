@@ -1,7 +1,7 @@
 {
-  "name": "viacheslaw.ru",
+  "name": "test-kraisoft",
   "version": "1.0.0",
-  "description": "Web Developer Promo",
+  "description": "Test task for interview",
   "main": "index.js",
   "scripts": {
     "lint": "eslint src __tests__",
@@ -17,9 +17,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/via4e/viacheslaw.ru/issues"
+    "url": "https://github.com/via4e/test-krai/issues"
   },
-  "homepage": "https://github.com/via4e/viacheslaw.ru#readme",
+  "homepage": "https://github.com/via4e/test-krai#readme",
   "dependencies": {},
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.42.1",
