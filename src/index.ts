@@ -1,45 +1,82 @@
 import './scss/style.scss'
+import { state } from './types'
 
-const playgroundState = {
-    mouseOnNice: false,
-    controlled: false
+
+const appCoords = () => {
+    const { x, y } = App.getBoundingClientRect()
+    appState.offsetX = appState.mouseX - appState.cubeX
+    appState.offsetY = appState.mouseY - appState.cubeY
+    console.warn('App x,y:', x, y)
 }
 
-const controlledElement = document.createElement('div')
-controlledElement.setAttribute('id', 'nice')
-document.getElementById('app').append(controlledElement)
+const resizer = () => {
+    appCoords()
+}
 
-controlledElement.addEventListener('mouseenter', () => {
-    playgroundState.mouseOnNice = true
-    console.log('mouseOnNice: ', playgroundState.mouseOnNice)
-});
+const appState: state = {
+    mouseOnNice: false,
+    controlled: false,
+    cubeX: undefined,
+    cubeY: undefined,
+    mouseX: undefined,
+    mouseY: undefined,
+    offsetX: undefined,
+    offsetY: undefined
+}
 
-controlledElement.addEventListener('mouseleave', () => {
-    playgroundState.mouseOnNice = false
-    console.log('mouseOnNice: ', playgroundState.mouseOnNice)
-});
+// Create controlled Element
+const cube = document.createElement('div')
+cube.setAttribute('id', 'nice')
+cube.style.left = '100px'
+cube.style.top = '100px'
 
-controlledElement.addEventListener('mousedown', () => {
-    if (playgroundState.mouseOnNice) {
-        playgroundState.controlled = true
+// Get playground, add listner and controlled element into them
+const App = document.getElementById('app')
+window.addEventListener("resize", resizer, false)
+App.append(cube)
+appCoords()
+
+cube.addEventListener('mouseenter', () => {
+    appState.mouseOnNice = true
+    console.log('mouseOnNice: ', appState.mouseOnNice)
+}, false);
+
+cube.addEventListener('mouseleave', () => {
+    appState.mouseOnNice = false
+    console.log('mouseOnNice: ', appState.mouseOnNice)
+}, false);
+
+cube.addEventListener('mousedown', () => {
+    if (appState.mouseOnNice) {
+        appState.controlled = true
     }
-    console.log('Controlled: ', playgroundState.controlled)
-});
+    console.log('Controlled: ', appState.controlled)
+}, false)
 
-controlledElement.addEventListener('mouseup', () => {
-    if (playgroundState.mouseOnNice) {
-        playgroundState.controlled = false
-    }
-    console.log('Controlled: ', playgroundState.controlled)
-});
+App.addEventListener('mouseup', () => {
+    appState.controlled = false
+    console.log('Controlled: ', appState.controlled)
+}, false)
 
-onmousemove = (event) => { 
-    if (playgroundState.controlled) {
-        console.log(controlledElement.style, controlledElement.style.left)
-        //controlledElement.offsetTop += event.offsetY
-        //controlledElement.offsetLeft += event.offsetX
+onmousemove = (event) => {
+    console.log('mouse x:', event.x,
+        'mouse y:', event.y,
+        'cube x:', Number(cube.style.top.slice(0, -2)),
+        'cube y:', Number(cube.style.left.slice(0, -2)),
+        'offsetX: ', appState.offsetX,
+        'offsetY: ', appState.offsetY,
+    )
+
+    appState.mouseX = event.x
+    appState.mouseY = event.y
+
+    if (appState.controlled) {
+        //const { x, y } = cube.getBoundingClientRect()
+        cube.style.left = event.x - appState.offsetX + 'px'
+        cube.style.top = event.y - appState.offsetY + 'px'
     } else {
-        console.log ('mouse move')
+        console.log('mouse move')
         return 0
     }
-};
+}
+
