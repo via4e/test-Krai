@@ -1,17 +1,17 @@
-export type state = {
-    mouseOnNice: boolean,
-    controlled: boolean,
-    cubeX: number,
-    cubeY: number,
-    cubeWidth: number,
-    cubeHeight: number,
-    appX: number,
-    appY: number,
-    appWidth: number,
-    appHeight: number,
-    mouseX: number,
-    mouseY: number,
-    offsetX: number,
-    offsetY: number,
-    isInit: boolean
+export type playground = {
+    x: number,
+    y: number,
+    bottomY: number,
+    rightX: number,
+}
+
+export type sprite = {
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    bottomY: number,
+    rightX: number,
+    mouseOn: boolean,
+    controlled: boolean
 }

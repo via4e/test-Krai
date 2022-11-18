@@ -1,97 +1,114 @@
 import './scss/style.scss'
-import { state } from './types'
+import { playground, sprite } from './types'
 
-const appCoords = () => {
-    const cubeCoord = cube.getBoundingClientRect()
-    appState.cubeX = cubeCoord.x
-    appState.cubeY = cubeCoord.y
-    appState.cubeWidth = cubeCoord.width
-    appState.cubeHeight = cubeCoord.height
-
-    const appCoord = App.getBoundingClientRect()
-    appState.appX = appCoord.x
-    appState.appY = appCoord.y
-    appState.appWidth = appCoord.width
-    appState.appHeight = appCoord.height
-
-    appState.offsetX = appState.mouseX - appState.cubeX
-    appState.offsetY = appState.mouseY - appState.cubeY
-    console.warn('appCoords, new appState:', appState)
+const stateApp: playground = {
+    x: undefined,
+    y: undefined,
+    bottomY: undefined,
+    rightX: undefined,
 }
 
-const boundaryCheck = (x: number, y: number) => {
-    if (x <= appState.appX - appState.offsetX || x >= appState.appX + appState.appWidth - appState.cubeWidth) return false
-    if (y <= appState.appY - appState.offsetY || y >= appState.appY + appState.appHeight - appState.cubeHeight) return false
+const stateSprite: sprite = {
+    x: undefined,
+    y: undefined,
+    width: undefined,
+    height: undefined,
+    bottomY: undefined,
+    rightX: undefined,
+    mouseOn: false,
+    controlled: false
+}
+
+// debug info to console
+const printState = (msg: string) => {
+    const isMouse = msg.slice(0, 5) === 'mouse'
+    if (isMouse) {
+        console.log('\x1b[36m%s\x1b[0m', msg)
+    }
+    console.log('\x1b[36m%s\x1b[0m', isMouse ? '' : msg, '  App ::> x:', Math.trunc(stateApp.x), ' y:', Math.trunc(stateApp.y), ' bottomY:', Math.trunc(stateApp.bottomY), ' rightX', Math.trunc(stateApp.rightX))
+    console.log('Sprite ::> x:', Math.trunc(stateSprite.x), ' y:', Math.trunc(stateSprite.y), ' bottomY:', Math.trunc(stateSprite.bottomY), ' rightX', Math.trunc(stateSprite.rightX), 'mouseOn / control: ', stateSprite.mouseOn, ' / ', stateSprite.controlled)
+
+}
+
+const reCalculate = () => {
+    // #app - init coordinates playground block
+    const appCoords = App.getBoundingClientRect()
+    stateApp.x = appCoords.x
+    stateApp.y = appCoords.y
+    stateApp.rightX = appCoords.right
+    stateApp.bottomY = appCoords.bottom
+
+    // #sprite - init coordinates playground block
+    const spriteCoords = Sprite.getBoundingClientRect()
+    stateSprite.x = spriteCoords.x
+    stateSprite.y = spriteCoords.y
+    stateSprite.width = spriteCoords.width
+    stateSprite.height = spriteCoords.height
+    stateSprite.rightX = spriteCoords.right
+    stateSprite.bottomY = spriteCoords.bottom
+
+    // #sprite - init coordinates controlled element
+    printState('reCalculate')
+}
+
+// sprite - border crossing check
+const boundaryCheck = (x: number, y: number): boolean => {
+    if (x <= stateApp.x || x >= stateApp.rightX - stateSprite.width) return false
+    if (y <= stateApp.y || y >= stateApp.bottomY - stateSprite.width) return false
     return true
 }
 
-const appState: state = {
-    mouseOnNice: false,
-    controlled: false,
-    cubeX: undefined,
-    cubeY: undefined,
-    cubeWidth: undefined,
-    cubeHeight: undefined,
-    appX: undefined,
-    appY: undefined,
-    appWidth: undefined,
-    appHeight: undefined,
-    mouseX: undefined,
-    mouseY: undefined,
-    offsetX: undefined,
-    offsetY: undefined,
-    isInit: false
-}
-
-// Create controlled Element
-const cube = document.createElement('div')
-cube.setAttribute('id', 'nice')
-cube.style.left = '100px'
-cube.style.top = '100px'
-
-// Get playground, add listner and controlled element into them
+//Create playground
 const App = document.getElementById('app')
-window.addEventListener("resize", appCoords, false)
-App.append(cube)
-appCoords()
+window.addEventListener("resize", reCalculate, false)
 
-cube.addEventListener('mouseenter', () => {
-    appState.mouseOnNice = true
+// Create controlled sprite
+const Sprite = document.createElement('div')
+Sprite.setAttribute('id', 'sprite')
+Sprite.style.left = '100px'
+Sprite.style.top = '100px'
+App.append(Sprite)
+
+//fix actual coordinates
+reCalculate()
+
+//Set listners on mouse actions
+Sprite.addEventListener('mouseenter', () => {
+    stateSprite.mouseOn = true
 }, false);
 
-cube.addEventListener('mouseleave', () => {
-    appState.mouseOnNice = false
+Sprite.addEventListener('mouseleave', () => {
+    stateSprite.mouseOn = false
 }, false);
 
-cube.addEventListener('mousedown', () => {
-    if (appState.mouseOnNice) {
-        appState.controlled = true
+Sprite.addEventListener('mousedown', (event) => {
+    if (stateSprite.mouseOn) {
+        stateSprite.controlled = true
     }
+    printState('mousedown x,y:' + event.x + ', ' + event.y + ',  offset x,y:' + event.offsetX + ', ' + event.offsetY)
 }, false)
 
-App.addEventListener('mouseup', () => {
-    appState.controlled = false
+App.addEventListener('mouseup', (event) => {
+    stateSprite.controlled = false
+    printState('mouseup x,y:' + event.x + ', ' + event.y + ',  offset x,y:' + event.offsetX + ', ' + event.offsetY)
 }, false)
 
 onmousemove = (event) => {
-    if (appState.controlled) {
-        appState.mouseX = event.x + appState.appX
-        appState.mouseY = event.y + appState.appY
-        if (!appState.isInit) {
-            console.warn('Init')
-            appCoords()
-            appState.isInit = true
-        }
+    if (stateSprite.controlled) {
+        printState('mouse move x,y:' + event.x + ', ' + event.y + ',  offset x,y:' + event.offsetX + ', ' + event.offsetY)
 
-        const newX = event.x - appState.offsetX
-        const newY = event.y - appState.offsetY
-        console.log(newX, newY, boundaryCheck(newX, newY))
-        if (boundaryCheck(newX, newY)) {
-            cube.style.left = newX + 'px'
-            cube.style.top = newY + 'px'
+        const { x, y, offsetX, offsetY } = event  // mouse coords
+
+        if (stateSprite.controlled) {
+
+            const newX = stateSprite.mouseOn ? x - offsetX : x 
+            const newY = stateSprite.mouseOn ? y - offsetY : y 
+
+            if (boundaryCheck(newX, newY)) {
+                Sprite.style.left = newX - stateApp.x + 'px'
+                Sprite.style.top = newY - stateApp.y + 'px'
+            }
         }
-    } else {
-        return 0
     }
 }
 

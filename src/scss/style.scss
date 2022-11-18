@@ -1,19 +1,22 @@
+$app-background: #565654;
+$body-background: #376EA5;
+
 body {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: beige;
+  background-color: rgb(221, 221, 207);
 }
 
 #app {
   width: 80vw;
   height: 80vh;
-  background-color: white;
+  background-color: $app-background;
   position: relative;
 }
 
-#nice {
+#sprite {
   position: absolute;
   width: 32px;
   height: 32px;
